@@ -1,6 +1,6 @@
 <div align="center">
 
-# Deployment Guide: Lock Contract
+# Deployment Guide: Treasury Lock Contract
 
 </div>
 
@@ -110,7 +110,7 @@ You’ll see your published contract and all future transactions.
 
 ---
 
-## 7. 🛠️ Using the contract
+## 7. Using the contract
 
 ### (a) Lock SUI
 
@@ -186,7 +186,7 @@ sui client call \
 
 ---
 
-You are now ready to deploy and use the **Lock Contract** on Sui Testnet.
+You are now ready to deploy and use the **Treasury Lock Contract** on Sui Testnet.
 
 ---
 
