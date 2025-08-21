@@ -9,10 +9,9 @@ use sui::event;
 
 // Error codes
 const EInvalidDuration: u64 = 0; // Duration cannot be zero
-const EUnauthorized: u64 = 1;    // Sender is not the original lender
-const ETooEarly: u64 = 2;        // Withdrawal attempted before unlock time
-const EInvalidAmount: u64 = 3;   // Amount must be greater than zero
-const EDurationTooLong: u64 = 4; // Duration exceeds maximum allowed (1 year)
+const ETooEarly: u64 = 1;        // Withdrawal attempted before unlock time
+const EInvalidAmount: u64 = 2;   // Amount must be greater than zero
+const EDurationTooLong: u64 = 3; // Duration exceeds maximum allowed (1 year)
 
 
 // Conversion constant: milliseconds per minute
@@ -24,7 +23,7 @@ const MAX_DURATION_MINUTES: u64 = 525600; // 1 year
 
 
 // Stores locked tokens with time-based access control
-public struct Locker<phantom CoinType> has key, store {
+public struct Locker<phantom CoinType> has key {
     id: UID,
     balance: Balance<CoinType>,
     lender: address,
@@ -79,7 +78,7 @@ public entry fun lend<CoinType>(
     };
 
     // Transfer the Locker object back to the lender
-    transfer::public_transfer(locker, lender);
+    transfer::transfer(locker, lender);
 
     // Emit creation event for tracking
     event::emit(LoanCreated<CoinType> {
@@ -103,7 +102,6 @@ public entry fun withdraw_loan<CoinType>(
     let unlock_time = locker.start_time + locker.duration;
     let sender = tx_context::sender(ctx);
 
-    assert!(sender == locker.lender, EUnauthorized);
     assert!(now >= unlock_time, ETooEarly);
 
     let Locker { id, mut balance, lender: _, start_time: _, duration: _ } = locker;
