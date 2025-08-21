@@ -11,7 +11,7 @@ use sui::clock::{
 use sui::coin::{Self, Coin};
 use lock_contract::lock::{
     Locker, lend, withdraw_loan, get_locker_info,
-    EInvalidDuration, EUnauthorized, ETooEarly
+    EInvalidDuration, EUnauthorized, ETooEarly, EInvalidAmount
 };
 
 const CREATOR: address = @0xA;
@@ -39,6 +39,7 @@ fun test_lend_creates_locker_and_event() {
     assert_eq(effects.num_user_events(), 1); // Expect exactly one LoanCreated event
     scenario.end();
 }
+
 
 #[test]
 fun test_withdraw_after_duration() {
@@ -78,6 +79,7 @@ fun test_withdraw_after_duration() {
     scenario.end();
 }
 
+
 #[test]
 fun test_get_locker_info_returns_correct_data() {
     let mut scenario = ts::begin(CREATOR); {
@@ -109,6 +111,7 @@ fun test_get_locker_info_returns_correct_data() {
     scenario.end();
 }
 
+
 #[test, expected_failure(abort_code = EInvalidDuration)]
 fun test_lend_fails_zero_duration() {
     let mut scenario = ts::begin(CREATOR); {
@@ -126,6 +129,27 @@ fun test_lend_fails_zero_duration() {
 
     scenario.end();
 }
+
+
+#[test, expected_failure(abort_code = EInvalidAmount)]
+fun test_lend_fails_zero_amount() {
+    let mut scenario = ts::begin(CREATOR); {
+        let clock = create_for_testing(scenario.ctx());
+        share_for_testing(clock);
+    };
+    ts::next_tx(&mut scenario, CREATOR);
+
+    {
+        // Mint 0 coins - should fail due to amount == 0
+        let coin: Coin<u64> = coin::mint_for_testing<u64>(0, scenario.ctx());
+        let clock = ts::take_shared<Clock>(&scenario);
+        lend<u64>(coin, 10, &clock, scenario.ctx()); // invalid: 0 amount
+        ts::return_shared<Clock>(clock);
+    };
+
+    scenario.end();
+}
+
 
 #[test, expected_failure(abort_code = ETooEarly)]
 fun test_withdraw_fails_if_too_early() {
