@@ -12,10 +12,15 @@ const EInvalidDuration: u64 = 0; // Duration cannot be zero
 const EUnauthorized: u64 = 1;    // Sender is not the original lender
 const ETooEarly: u64 = 2;        // Withdrawal attempted before unlock time
 const EInvalidAmount: u64 = 3;   // Amount must be greater than zero
+const EDurationTooLong: u64 = 4; // Duration exceeds maximum allowed (1 year)
 
 
 // Conversion constant: milliseconds per minute
 const MS_PER_MINUTE: u64 = 60000;
+
+
+// Maximum loan duration in minutes (audit fix)
+const MAX_DURATION_MINUTES: u64 = 525600; // 1 year
 
 
 // Stores locked tokens with time-based access control
@@ -55,6 +60,7 @@ public entry fun lend<CoinType>(
     ctx: &mut TxContext
 ) {
     assert!(duration_minutes > 0, EInvalidDuration);
+    assert!(duration_minutes <= MAX_DURATION_MINUTES, EDurationTooLong);
 
     let duration_ms = duration_minutes * MS_PER_MINUTE;
     let now = clock.timestamp_ms();
