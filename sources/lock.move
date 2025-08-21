@@ -60,7 +60,7 @@ public entry fun lend<CoinType>(
     ctx: &mut TxContext
 ) {
     assert!(duration_minutes > 0, EInvalidDuration);
-    assert!(duration_minutes <= MAX_DURATION_MINUTES, EDurationTooLong);
+    assert!(duration_minutes <= MAX_DURATION_MINUTES, EDurationTooLong); // Ensures duration does not exceed 1 year (audit fix)
 
     let duration_ms = duration_minutes * MS_PER_MINUTE;
     let now = clock.timestamp_ms();
