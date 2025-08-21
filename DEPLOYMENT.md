@@ -2,11 +2,10 @@
 
 # Deployment Guide: Lock Contract
 
-This guide shows you how to deploy and use the **Treaury Lock Contract** on Sui **Testnet**.
-It’s written step-by-step so **even non-programmers** can follow along.
-
 </div>
 
+This guide shows you how to deploy and use the **Treaury Lock Contract** on Sui **Testnet**.
+It’s written step-by-step so **even non-programmers** can follow along.
 
 ## 1. Install Sui CLI
 
