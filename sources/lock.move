@@ -80,7 +80,7 @@ public entry fun lend<CoinType>(
         lender,
         amount,
         start_time: now,
-        duration: duration_minutes,
+        duration: duration_ms,
     });
 }
 
