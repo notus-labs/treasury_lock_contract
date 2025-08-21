@@ -11,6 +11,7 @@ use sui::event;
 const EInvalidDuration: u64 = 0; // Duration cannot be zero
 const EUnauthorized: u64 = 1;    // Sender is not the original lender
 const ETooEarly: u64 = 2;        // Withdrawal attempted before unlock time
+const EInvalidAmount: u64 = 3;   // Amount must be greater than zero
 
 
 // Conversion constant: milliseconds per minute
