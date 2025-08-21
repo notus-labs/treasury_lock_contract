@@ -11,13 +11,15 @@ use sui::clock::{
 use sui::coin::{Self, Coin};
 use lock_contract::lock::{
     Locker, lend, withdraw_loan, get_locker_info,
-    EInvalidDuration, EUnauthorized, ETooEarly, EInvalidAmount
+    EInvalidDuration, EUnauthorized, ETooEarly, EInvalidAmount, EDurationTooLong
 };
 
 const CREATOR: address = @0xA;
 const CALLER: address = @0xB;
 
 const MS_PER_MINUTE: u64 = 60000;
+const MAX_DURATION_MINUTES: u64 = 525600; // 1 year
+
 
 #[test]
 fun test_lend_creates_locker_and_event() {
@@ -151,6 +153,25 @@ fun test_lend_fails_zero_amount() {
 }
 
 
+#[test, expected_failure(abort_code = EDurationTooLong)]
+fun test_lend_fails_excessive_duration() {
+    let mut scenario = ts::begin(CREATOR); {
+        let clock = create_for_testing(scenario.ctx());
+        share_for_testing(clock);
+    };
+    ts::next_tx(&mut scenario, CREATOR);
+
+    {
+        let coin: Coin<u64> = coin::mint_for_testing<u64>(10, scenario.ctx());
+        let clock = ts::take_shared<Clock>(&scenario);
+        lend<u64>(coin, MAX_DURATION_MINUTES + 1, &clock, scenario.ctx()); // invalid: too long
+        ts::return_shared<Clock>(clock);
+    };
+
+    scenario.end();
+}
+
+
 #[test, expected_failure(abort_code = ETooEarly)]
 fun test_withdraw_fails_if_too_early() {
     let mut scenario = ts::begin(CREATOR); {
@@ -178,6 +199,7 @@ fun test_withdraw_fails_if_too_early() {
 
     scenario.end();
 }
+
 
 #[test, expected_failure(abort_code = EUnauthorized)]
 fun test_withdraw_fails_if_not_lender() {
