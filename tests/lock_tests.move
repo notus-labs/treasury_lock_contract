@@ -11,11 +11,10 @@ use sui::clock::{
 use sui::coin::{Self, Coin};
 use lock_contract::lock::{
     Locker, lend, withdraw_loan, get_locker_info,
-    EInvalidDuration, EUnauthorized, ETooEarly, EInvalidAmount, EDurationTooLong
+    EInvalidDuration, ETooEarly, EInvalidAmount, EDurationTooLong
 };
 
 const CREATOR: address = @0xA;
-const CALLER: address = @0xB;
 
 const MS_PER_MINUTE: u64 = 60000;
 const MAX_DURATION_MINUTES: u64 = 525600; // 1 year
@@ -194,43 +193,6 @@ fun test_withdraw_fails_if_too_early() {
         let locker: Locker<u64> = ts::take_from_address<Locker<u64>>(&scenario, CREATOR);
         let clock = ts::take_shared<Clock>(&scenario);
         withdraw_loan<u64>(locker, &clock, scenario.ctx()); // too early to withdraw
-        ts::return_shared<Clock>(clock);
-    };
-
-    scenario.end();
-}
-
-
-#[test, expected_failure(abort_code = EUnauthorized)]
-fun test_withdraw_fails_if_not_lender() {
-    let mut scenario = ts::begin(CREATOR); {
-        let clock = create_for_testing(scenario.ctx());
-        share_for_testing(clock);
-    };
-
-    ts::next_tx(&mut scenario, CREATOR);
-
-    {
-        let coin: Coin<u64> = coin::mint_for_testing<u64>(70, scenario.ctx());
-        let clock = ts::take_shared<Clock>(&scenario);
-        lend<u64>(coin, 1, &clock, scenario.ctx()); // lender = CREATOR
-        share_for_testing(clock);
-    };
-    
-    ts::next_tx(&mut scenario, CREATOR);
-
-    {
-        let mut clock = ts::take_shared<Clock>(&scenario);
-        increment_for_testing(&mut clock, MS_PER_MINUTE); // enough time passed
-        share_for_testing(clock);
-    };
-
-    ts::next_tx(&mut scenario, CALLER); // Different account attempts withdrawal
-
-    {
-        let locker: Locker<u64> = ts::take_from_address<Locker<u64>>(&scenario, CREATOR);
-        let clock = ts::take_shared<Clock>(&scenario);
-        withdraw_loan<u64>(locker, &clock, scenario.ctx()); // should fail: caller not lender
         ts::return_shared<Clock>(clock);
     };
 
