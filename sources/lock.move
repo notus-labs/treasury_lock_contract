@@ -61,6 +61,8 @@ public entry fun lend<CoinType>(
     let balance = coin::into_balance(coin);
     let amount = balance.value();
 
+    assert!(amount > 0, EInvalidAmount); // Ensures amount is greater than zero
+
     let locker = Locker {
         id: object::new(ctx),
         balance,
