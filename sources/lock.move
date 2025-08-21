@@ -62,14 +62,14 @@ public entry fun lend<CoinType>(
     let balance = coin::into_balance(coin);
     let amount = balance.value();
 
-    assert!(amount > 0, EInvalidAmount); // Ensures amount is greater than zero
+    assert!(amount > 0, EInvalidAmount); // Ensures amount is greater than zero (audit fix)
 
     let locker = Locker {
         id: object::new(ctx),
         balance,
         lender,
         start_time: now,
-        duration: duration_ms,
+        duration: duration_ms, // duration in milliseconds (audit fix)
     };
 
     // Transfer the Locker object back to the lender
